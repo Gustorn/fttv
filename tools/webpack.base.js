@@ -26,6 +26,14 @@ module.exports = {
 	module: {
 		rules: [
 			{
+				test: /\.css$/i,
+				use: [
+					"style-loader",
+					"css-loader",
+					{ loader: "postcss-loader", options: require("./postcss.config") }
+				]
+			},
+			{
 				test: /\.(woff|woff2|eot|ttf)$/i,
 				loader: "file-loader"
 			},
