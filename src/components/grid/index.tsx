@@ -3,7 +3,7 @@ import { WindowScroller } from "react-virtualized/dist/commonjs/WindowScroller";
 
 import GridSizer from "./grid-sizer";
 
-export default class Grid extends React.Component<OwnProps, {}> {
+export default class Grid extends React.PureComponent<OwnProps, {}> {
 	render() {
 		return (
 			<WindowScroller scrollElement={this.props.scrollElement}>
@@ -13,15 +13,12 @@ export default class Grid extends React.Component<OwnProps, {}> {
 	}
 
 	renderGridSizer = ({ height, isScrolling, scrollTop }: any) => {
-		const { rowHeight, cellWidth, items } = this.props;
 		return (
 			<GridSizer
 				height={height}
 				isScrolling={isScrolling}
 				scrollTop={scrollTop}
-				cellWidth={cellWidth}
-				rowHeight={rowHeight}
-				items={items}
+				{...this.props}
 			/>
 		);
 	}
@@ -29,7 +26,10 @@ export default class Grid extends React.Component<OwnProps, {}> {
 
 export interface OwnProps {
 	rowHeight: number;
-	cellWidth: number;
+	columnWidth: number;
 	scrollElement?: any;
+	isRowLoaded: ({ index }: { index: number }) => boolean;
+	loadMoreRows: ({ startIndex, stopIndex }: { startIndex: number, stopIndex: number }) => Promise<any[]>;
+	customCell: (props: { item: any, rowIndex: number, columnIndex: number }) => JSX.Element;
 	items: any[];
 }

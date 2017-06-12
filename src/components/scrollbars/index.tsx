@@ -3,7 +3,7 @@ import ReactScrollbars, { ScrollbarProps } from "react-custom-scrollbars";
 
 export default class Scrollbars extends React.Component<OwnProps, {}> {
 	render() {
-		const { children, ...rest } = this.props;
+		const { children, scrollRef, ...rest } = this.props;
 		return (
 			<ReactScrollbars ref={this.setScrollRef} {...rest}>
 				{children}
