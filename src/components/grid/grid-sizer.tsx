@@ -3,7 +3,7 @@ import { AutoSizer } from "react-virtualized/dist/commonjs/AutoSizer";
 
 import GridContent from "./grid-content";
 
-export default class GridSizer extends React.PureComponent<OwnProps, {}> {
+export default class GridSizer extends React.Component<OwnProps, {}> {
 	render() {
 		return (
 			<AutoSizer disableHeight {...this.props}>

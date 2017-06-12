@@ -1,22 +1,24 @@
 import React from "react";
-import ReactScrollbars, { ScrollbarProps } from "react-custom-scrollbars";
+import { ScrollbarProps } from "react-custom-scrollbars";
 
 export default class Scrollbars extends React.Component<OwnProps, {}> {
 	render() {
-		const { children, scrollRef, ...rest } = this.props;
+		const { children } = this.props;
 		return (
-			<ReactScrollbars ref={this.setScrollRef} {...rest}>
+			<div ref={this.setScrollRef} style={{ overflow: "auto", flex: "1 0 auto", width: "100%" }}>
 				{children}
-			</ReactScrollbars>
+			</div>
 		);
 	}
 
 	setScrollRef = (element: any) => {
 		const { scrollRef } = this.props;
-		scrollRef(element.view);
+		if (scrollRef) {
+			scrollRef(element);
+		}
 	}
 }
 
 interface OwnProps extends ScrollbarProps {
-	scrollRef: (element: any) => void;
+	scrollRef?: (element: any) => void;
 }

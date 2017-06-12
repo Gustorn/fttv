@@ -10,7 +10,7 @@ export default class DummyCell extends React.PureComponent<OwnProps, {}> {
 					display: "flex",
 					flexFlow: "column nowrap",
 					alignItems: "center",
-					justifyContent: "center"
+					justifyContent: "center",
 				}}
 			>
 				<div

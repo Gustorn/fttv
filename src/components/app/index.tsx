@@ -15,6 +15,7 @@ import style from "./style.scss";
 const Auth = Loadable(() => System.import("pages/auth"));
 const Settings = Loadable(() => System.import("pages/settings"));
 const Directory = Loadable(() => System.import("pages/directory"));
+const Following = Loadable(() => System.import("pages/following"));
 
 const App = ({ theme }: Props) => (
 	<CustomProperties global properties={theme.properties}>
@@ -30,7 +31,7 @@ const App = ({ theme }: Props) => (
 				<Route exact path="/auth" component={Auth} />
 				<Route exact path="/settings" component={Settings} />
 				<Route exact path="/directory" component={Directory} />
-				<Route exact path="/directory/following" component={null!} />
+				<Route exact path="/directory/following" component={Following} />
 			</div>
 		</main>
 	</CustomProperties>

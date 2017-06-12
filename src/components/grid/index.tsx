@@ -3,7 +3,7 @@ import { WindowScroller } from "react-virtualized/dist/commonjs/WindowScroller";
 
 import GridSizer from "./grid-sizer";
 
-export default class Grid extends React.PureComponent<OwnProps, {}> {
+export default class Grid extends React.Component<OwnProps, {}> {
 	render() {
 		return (
 			<WindowScroller scrollElement={this.props.scrollElement}>
