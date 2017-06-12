@@ -3,27 +3,18 @@ import { AutoSizer } from "react-virtualized/dist/commonjs/AutoSizer";
 
 import GridContent from "./grid-content";
 
-export default class GridSizer extends React.Component<OwnProps, {}> {
+export default class GridSizer extends React.PureComponent<OwnProps, {}> {
 	render() {
 		return (
-			<AutoSizer disableHeight {...this.props} nonce={this.props.scrollTop.toString()}>
+			<AutoSizer disableHeight {...this.props}>
 				{this.renderContent}
 			</AutoSizer>
 		);
 	}
 
 	renderContent = ({ width }: { width: number }) => {
-		const { height, rowHeight, cellWidth, isScrolling, scrollTop, items } = this.props;
 		return (
-			<GridContent
-				width={width}
-				height={height}
-				rowHeight={rowHeight}
-				cellWidth={cellWidth}
-				isScrolling={isScrolling}
-				scrollTop={scrollTop}
-				items={items}
-			/>
+			<GridContent width={width} {...this.props} />
 		);
 	}
 }
@@ -31,8 +22,11 @@ export default class GridSizer extends React.Component<OwnProps, {}> {
 interface OwnProps {
 	height: number;
 	rowHeight: number;
-	cellWidth: number;
+	columnWidth: number;
 	isScrolling: boolean;
 	scrollTop: number;
 	items: any[];
+	isRowLoaded: ({ index }: { index: number }) => boolean;
+	loadMoreRows: ({ startIndex, stopIndex }: { startIndex: number, stopIndex: number }) => Promise<any[]>;
+	customCell: (props: { item: any, rowIndex: number, columnIndex: number }) => JSX.Element;
 }
