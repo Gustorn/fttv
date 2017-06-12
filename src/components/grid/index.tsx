@@ -1,5 +1,5 @@
 import React from "react";
-import { WindowScroller } from "react-virtualized";
+import { WindowScroller } from "react-virtualized/dist/commonjs/WindowScroller";
 
 import GridSizer from "./grid-sizer";
 
@@ -12,14 +12,13 @@ export default class Grid extends React.Component<OwnProps, {}> {
 		);
 	}
 
-	renderGridSizer = ({ height, isScrolling, scrollTop, onChildScroll }: any) => {
+	renderGridSizer = ({ height, isScrolling, scrollTop }: any) => {
 		const { rowHeight, cellWidth, items } = this.props;
 		return (
 			<GridSizer
 				height={height}
 				isScrolling={isScrolling}
 				scrollTop={scrollTop}
-				onScroll={onChildScroll}
 				cellWidth={cellWidth}
 				rowHeight={rowHeight}
 				items={items}
