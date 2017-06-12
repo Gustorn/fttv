@@ -1,6 +1,7 @@
 import React from "react";
 
 import Grid from "components/grid";
+import Scrollbars from "components/scrollbars";
 
 const dummyItems = [...Array.from(Array(1000).keys())];
 
@@ -12,12 +13,11 @@ export default class Directory extends React.Component<{}, State> {
 
 	render() {
 		return (
-			<div
-				ref={this.setScrollingElement}
-				style={{ width: "100%", overflow: "auto", padding: "0 3em" }}
-			>
-				<Grid cellWidth={150} items={dummyItems} rowHeight={250} scrollElement={this.state.scrollElement} />
-			</div>
+			<Scrollbars scrollRef={this.setScrollingElement}>
+				<div style={{ padding: "0 3em" }}>
+					<Grid cellWidth={150} items={dummyItems} rowHeight={250} scrollElement={this.state.scrollElement} />
+				</div>
+			</Scrollbars>
 		);
 	}
 
