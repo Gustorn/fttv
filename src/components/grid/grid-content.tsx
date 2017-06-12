@@ -1,13 +1,11 @@
 import React from "react";
-import { Grid } from "react-virtualized";
+import { Grid } from "react-virtualized/dist/commonjs/Grid";
 
 export default class GridContent extends React.Component<OwnProps, {}> {
 	render() {
-		const { width, height, isScrolling, scrollTop, onScroll, rowHeight, items } = this.props;
+		const { width, height, isScrolling, scrollTop, rowHeight, items } = this.props;
 		const { columns, cellWidth } = this.calculateActualSize();
 		const rowCount = Math.ceil(items.length / columns);
-		console.log(columns);
-		console.log(rowCount);
 		return (
 			<Grid
 				autoHeight
@@ -20,16 +18,19 @@ export default class GridContent extends React.Component<OwnProps, {}> {
 				rowCount={rowCount}
 				isScrolling={isScrolling}
 				scrollTop={scrollTop}
-				onScroll={onScroll}
 			/>
 		);
 	}
 
-	renderCell = ({ key, style, columnIndex, rowIndex }: { columnIndex: number, rowIndex: number, key: any, style: any }) => {
+	renderCell = ({ key, style }: CellRenderProps) => {
 		return (
 			<div
 				key={key}
-				style={{ ...style, backgroundColor: (columnIndex + rowIndex) % 2 === 0 ? "grey" : "white" }}
+				style={{
+					...style,
+					background: "url(https://static-cdn.jtvnw.net/ttv-boxart/Casino-272x380.jpg) center no-repeat",
+					backgroundSize: "90%"
+				}}
 			/>
 		);
 	}
@@ -46,8 +47,6 @@ export default class GridContent extends React.Component<OwnProps, {}> {
 
 		const lessColumnsDelta = (width - idealLessColumns) / lessColumns;
 		const moreColumnsDelta = (width - idealMoreColumns) / moreColumns;
-		console.log(`Less: ${lessColumns}, ${lessColumnsDelta}`);
-		console.log(`More: ${moreColumns}, ${moreColumnsDelta}`);
 
 		return lessColumnsDelta < -moreColumnsDelta
 			? { columns: lessColumns, cellWidth: cellWidth + lessColumnsDelta }
@@ -60,8 +59,14 @@ export interface OwnProps {
 	height: number;
 	isScrolling: boolean;
 	scrollTop: number;
-	onScroll: any;
 	rowHeight: number;
 	cellWidth: number;
 	items: any[];
+}
+
+interface CellRenderProps {
+	key: string | number;
+	style: any;
+	rowIndex: number;
+	columnIndex: number;
 }
