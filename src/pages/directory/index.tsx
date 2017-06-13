@@ -1,10 +1,10 @@
 import React from "react";
 
-import Grid from "components/grid";
+import Grid, { LoadGridElements } from "components/grid";
 import DummyCell from "components/grid/cell/dummy";
 import Scrollbars from "components/scrollbars";
 
-const dummyItems = [...Array.from(Array(40).keys())];
+const dummyItems = [...Array.from(Array(60).keys())];
 
 export default class Directory extends React.Component<{}, State> {
 	constructor(props: {}) {
@@ -15,39 +15,33 @@ export default class Directory extends React.Component<{}, State> {
 	render() {
 		return (
 			<Scrollbars scrollRef={this.setScrollingElement}>
-				<div style={{ padding: "0 3em" }}>
+				<div style={{ padding: "0 3em", height: "100%" }}>
 					<Grid
-						columnWidth={150}
-						items={this.state.dummyItems}
-						rowHeight={250}
 						scrollElement={this.state.scrollElement}
-						isRowLoaded={this.isRowLoaded}
-						loadMoreRows={this.loadMoreRows}
-						customCell={this.renderCell}
+						rowHeight={250}
+						columnWidth={150}
+						cellRenderer={this.renderCell}
+						loadElements={this.loadElements}
+						loadThreshold={250}
+						items={this.state.dummyItems}
 					/>
 				</div>
 			</Scrollbars>
 		);
 	}
 
-	private isRowLoaded = ({ index }: { index: number }) => {
-		return this.state.dummyItems.length > index;
-	}
-
-	private loadMoreRows = async ({}: { startIndex: number, stopIndex: number }) => {
-		const additionalItems = [...Array(60).keys()];
-		const newItems = [...this.state.dummyItems, ...additionalItems];
-		this.setState({...this.state, dummyItems: newItems });
-		return newItems;
-	}
-
 	private setScrollingElement = (scrollElement: any) => {
-		this.setState({ scrollElement });
+		this.setState({ ...this.state, scrollElement });
 	}
 
-	private renderCell = ({ item, rowIndex, columnIndex }: { item: any, rowIndex: number, columnIndex: number }) => {
+	private loadElements = ({ fillPageCount }: LoadGridElements) => {
+		const newElements = [...new Array(Math.max(fillPageCount, 40)).keys()];
+		this.setState({ ...this.state, dummyItems: [...this.state.dummyItems, ...newElements] });
+	}
+
+	private renderCell = ({ item, index }: { item: any, index: number }) => {
 		return (
-			<DummyCell item={item} rowIndex={rowIndex} columnIndex={columnIndex} />
+			<DummyCell item={item} index={index} />
 		);
 	}
 }

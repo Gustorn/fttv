@@ -2,7 +2,7 @@ import React from "react";
 
 export default class DummyCell extends React.PureComponent<OwnProps, {}> {
 	render() {
-		const { rowIndex, columnIndex } = this.props;
+		const { index } = this.props;
 		return (
 			<div
 				style={{
@@ -20,7 +20,7 @@ export default class DummyCell extends React.PureComponent<OwnProps, {}> {
 						flex: "1 1 auto"
 					}}
 				/>
-				<div>({rowIndex}, {columnIndex})</div>
+				<div>({index})</div>
 			</div>
 		);
 	}
@@ -28,6 +28,5 @@ export default class DummyCell extends React.PureComponent<OwnProps, {}> {
 
 interface OwnProps {
 	item: any;
-	rowIndex: number;
-	columnIndex: number;
+	index: number;
 }
