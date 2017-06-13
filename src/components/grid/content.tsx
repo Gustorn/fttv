@@ -5,7 +5,6 @@ import InfiniteScroll from "components/infinite-scroll";
 
 export default class GridContent extends React.Component<OwnProps, State> {
 	private grid: HTMLElement;
-	private memoizedLoads: { [key: number]: boolean } = {};
 
 	constructor(props: OwnProps) {
 		super(props);
@@ -56,12 +55,8 @@ export default class GridContent extends React.Component<OwnProps, State> {
 		const { rowCount, columnCount } = this.state;
 
 		const startIndex = items.length;
-		if (!this.memoizedLoads[startIndex]) {
-			this.memoizedLoads[startIndex] = true;
-
-			const fillGridCount = (rowCount * columnCount) - items.length;
-			this.props.loadElements({ startIndex, fillPageCount: fillPageCount + fillGridCount });
-		}
+		const fillGridCount = (rowCount * columnCount) - items.length;
+		this.props.loadElements({ startIndex, fillPageCount: fillPageCount + fillGridCount });
 	}
 
 	private tryFillPageIfNecessary = () => {

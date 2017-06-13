@@ -7,6 +7,8 @@ import Scrollbars from "components/scrollbars";
 const dummyItems = [...Array.from(Array(60).keys())];
 
 export default class Directory extends React.Component<{}, State> {
+	private memoizedLoads: { [key: number]: boolean } = {};
+
 	constructor(props: {}) {
 		super(props);
 		this.state = { scrollElement: window, dummyItems };
@@ -16,7 +18,7 @@ export default class Directory extends React.Component<{}, State> {
 		return (
 			<Scrollbars scrollRef={this.setScrollingElement}>
 				<div style={{ padding: "0 3em", height: "100%" }}>
-					<Grid
+					{this.state.scrollElement && <Grid
 						scrollElement={this.state.scrollElement}
 						rowHeight={250}
 						columnWidth={150}
@@ -24,7 +26,7 @@ export default class Directory extends React.Component<{}, State> {
 						loadElements={this.loadElements}
 						loadThreshold={250}
 						items={this.state.dummyItems}
-					/>
+					/>}
 				</div>
 			</Scrollbars>
 		);
@@ -34,11 +36,14 @@ export default class Directory extends React.Component<{}, State> {
 		this.setState({ ...this.state, scrollElement });
 	}
 
-	private loadElements = ({ fillPageCount }: LoadGridElements) => {
-		setTimeout(() => {
-			const newElements = [...new Array(Math.max(fillPageCount, 40)).keys()];
-			this.setState({ ...this.state, dummyItems: [...this.state.dummyItems, ...newElements] });
-		}, 250);
+	private loadElements = ({ startIndex, fillPageCount }: LoadGridElements) => {
+		if (!this.memoizedLoads[startIndex]) {
+			this.memoizedLoads[startIndex] = true;
+			setTimeout(() => {
+				const newElements = [...new Array(Math.max(fillPageCount, 40)).keys()];
+				this.setState({ ...this.state, dummyItems: [...this.state.dummyItems, ...newElements] });
+			}, 250);
+		}
 	}
 
 	private renderCell = ({ item, index }: { item: any, index: number }) => {
