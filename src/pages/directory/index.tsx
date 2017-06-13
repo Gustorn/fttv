@@ -2,7 +2,6 @@ import React from "react";
 
 import Grid, { LoadGridElements } from "components/grid";
 import DummyCell from "components/grid/cell/dummy";
-import Scrollbars from "components/scrollbars";
 
 const dummyItems = [...Array.from(Array(60).keys())];
 
@@ -16,7 +15,7 @@ export default class Directory extends React.Component<{}, State> {
 
 	render() {
 		return (
-			<Scrollbars scrollRef={this.setScrollingElement}>
+			<div ref={this.setScrollingElement} style={{ overflow: "auto", width: "100%" }}>
 				<div style={{ padding: "0 3em", height: "100%" }}>
 					{this.state.scrollElement && <Grid
 						scrollElement={this.state.scrollElement}
@@ -28,7 +27,7 @@ export default class Directory extends React.Component<{}, State> {
 						items={this.state.dummyItems}
 					/>}
 				</div>
-			</Scrollbars>
+			</div>
 		);
 	}
 
@@ -42,7 +41,7 @@ export default class Directory extends React.Component<{}, State> {
 			setTimeout(() => {
 				const newElements = [...new Array(Math.max(fillPageCount, 40)).keys()];
 				this.setState({ ...this.state, dummyItems: [...this.state.dummyItems, ...newElements] });
-			}, 250);
+			}, 0);
 		}
 	}
 

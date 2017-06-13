@@ -49,7 +49,7 @@ export default class Grid extends React.Component<OwnProps, {}> {
 	}
 
 	private handleResize = () => {
-		if (!this.resizeTicking) {
+		if (!this.resizeTicking && this.container) {
 			requestAnimationFrame(() => {
 				this.forceUpdate();
 				this.resizeTicking = false;
