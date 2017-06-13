@@ -35,8 +35,10 @@ export default class Directory extends React.Component<{}, State> {
 	}
 
 	private loadElements = ({ fillPageCount }: LoadGridElements) => {
-		const newElements = [...new Array(Math.max(fillPageCount, 40)).keys()];
-		this.setState({ ...this.state, dummyItems: [...this.state.dummyItems, ...newElements] });
+		setTimeout(() => {
+			const newElements = [...new Array(Math.max(fillPageCount, 40)).keys()];
+			this.setState({ ...this.state, dummyItems: [...this.state.dummyItems, ...newElements] });
+		}, 250);
 	}
 
 	private renderCell = ({ item, index }: { item: any, index: number }) => {
