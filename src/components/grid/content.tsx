@@ -59,7 +59,7 @@ export default class GridContent extends React.Component<OwnProps, State> {
 		if (!this.memoizedLoads[startIndex]) {
 			this.memoizedLoads[startIndex] = true;
 
-			const fillGridCount = items.length - (rowCount * columnCount);
+			const fillGridCount = (rowCount * columnCount) - items.length;
 			this.props.loadElements({ startIndex, fillPageCount: fillPageCount + fillGridCount });
 		}
 	}
