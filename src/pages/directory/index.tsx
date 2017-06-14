@@ -1,58 +1,72 @@
 import React from "react";
+import { connect } from "react-redux";
+import { Action, Dispatch, bindActionCreators } from "redux";
 
-import Grid, { LoadGridElements } from "components/grid";
-import DummyCell from "components/grid/cell/dummy";
+import { State } from "data";
+import { fetchTop } from "data/games";
 
-const dummyItems = [...Array.from(Array(60).keys())];
+import { TopGame } from "common/twitch-api/games";
+import { returnOf } from "common/util";
 
-export default class Directory extends React.Component<{}, State> {
-	private memoizedLoads: { [key: number]: boolean } = {};
+import VirtualGrid from "components/grid";
+import { GridCellProps } from "components/grid/cell";
+import GameCell from "components/grid/cell/game";
 
-	constructor(props: {}) {
+import style from "./index.scss";
+
+class Directory extends React.Component<Props, DirectoryState> {
+	constructor(props: Props) {
 		super(props);
-		this.state = { scrollElement: window, dummyItems };
+		this.state = { scrollElement: window };
+	}
+
+	componentWillMount() {
+		this.props.fetchTop(0, 60);
 	}
 
 	render() {
+		const { topGames } = this.props;
 		return (
-			<div ref={this.setScrollingElement} style={{ overflow: "auto", width: "100%" }}>
-				<div style={{ padding: "0 3em", height: "100%" }}>
-					{this.state.scrollElement && <Grid
-						scrollElement={this.state.scrollElement}
-						rowHeight={250}
-						columnWidth={150}
-						cellRenderer={this.renderCell}
-						loadElements={this.loadElements}
-						loadThreshold={250}
-						items={this.state.dummyItems}
-					/>}
-				</div>
+			<div className={style.directoryContainer} ref={this.setScrollingElement}>
+				<VirtualGrid
+					items={topGames.top}
+					targetColumnWidth={200}
+					rowHeight={315}
+					renderer={this.renderCell}
+					scrollElement={this.state.scrollElement}
+				/>
 			</div>
 		);
 	}
 
-	private setScrollingElement = (scrollElement: any) => {
+	private setScrollingElement = (scrollElement: HTMLElement) => {
 		this.setState({ ...this.state, scrollElement });
 	}
 
-	private loadElements = ({ startIndex, fillPageCount }: LoadGridElements) => {
-		if (!this.memoizedLoads[startIndex]) {
-			this.memoizedLoads[startIndex] = true;
-			setTimeout(() => {
-				const newElements = [...new Array(Math.max(fillPageCount, 40)).keys()];
-				this.setState({ ...this.state, dummyItems: [...this.state.dummyItems, ...newElements] });
-			}, 0);
-		}
-	}
-
-	private renderCell = ({ item, index }: { item: any, index: number }) => {
+	private renderCell = ({ item, index }: GridCellProps<TopGame>) => {
 		return (
-			<DummyCell item={item} index={index} />
+			<GameCell item={item} index={index} />
 		);
 	}
 }
 
-interface State {
+const mapStateToProps = (state: State) => ({
+	topGames: state.games.topGames
+});
+
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => bindActionCreators({
+	fetchTop
+}, dispatch);
+
+type Props = typeof StateProps & typeof DispatchProps;
+const StateProps = returnOf(mapStateToProps);
+const DispatchProps = returnOf(mapDispatchToProps);
+
+interface DirectoryState {
 	scrollElement: any;
-	dummyItems: any[];
 }
+
+export default connect<typeof StateProps, typeof DispatchProps, {}>(
+	mapStateToProps,
+	mapDispatchToProps
+)(Directory);

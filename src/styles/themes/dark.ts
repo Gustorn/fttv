@@ -15,6 +15,8 @@ export default {
 		"--button-shadow": "#7d5bbe",
 
 		"--navigation-bar-background": "#4b367c",
-		"--navigation-bar-text": "#fff"
+		"--navigation-bar-text": "#fff",
+
+		"--viewer-text": "#666"
 	}
 } as Theme;

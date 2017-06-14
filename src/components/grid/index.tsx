@@ -1,78 +1,64 @@
 import React from "react";
 
-import { LoadGridElements } from "./common";
+import { AutoSizer } from "react-virtualized/dist/commonjs/AutoSizer";
+import { WindowScroller } from "react-virtualized/dist/commonjs/WindowScroller";
+
 import GridContent from "./content";
 
-export default class Grid extends React.Component<OwnProps, {}> {
-	private resizeTicking = false;
-
-	private previousContainer: HTMLElement | null = null;
-	private container: HTMLElement;
-
-	constructor(props: OwnProps) {
-		super(props);
-	}
-
-	componentDidMount() {
-		window.addEventListener("resize", this.handleResize, true);
-	}
-
-	componentWillUnmount() {
-		window.removeEventListener("resize", this.handleResize);
-	}
-
-	componentDidUpdate() {
-		if (!this.previousContainer && this.container) {
-			this.previousContainer = this.container;
-			this.forceUpdate();
-		}
-	}
-
+export default class VirtualGrid extends React.PureComponent<OwnProps, {}> {
 	render() {
-		const { items, columnWidth, cellRenderer, rowHeight, scrollElement, loadElements, loadThreshold } = this.props;
+		const { scrollElement } = this.props;
 		return (
-			<div ref={this.setContainer} style={{ width: "100%", height: "100%" }}>
-				{!!this.container && <GridContent
-					container={this.container}
-					fullWidth={this.container.offsetWidth}
-					fullHeight={this.container.offsetHeight}
-					scrollElement={scrollElement}
-					loadElements={loadElements}
-					loadThreshold={loadThreshold}
-					items={items}
-					rowHeight={rowHeight}
-					columnWidth={columnWidth}
-					cellRenderer={cellRenderer}
-				/>}
-			</div>
+			<WindowScroller scrollElement={scrollElement}>
+				{({ height, isScrolling, scrollTop }) => (
+					<AutoSizer disableHeight>
+						{({ width }) => this.renderInner(width, height, isScrolling, scrollTop)}
+					</AutoSizer>
+				)}
+			</WindowScroller>
 		);
 	}
 
-	private handleResize = () => {
-		if (!this.resizeTicking && this.container) {
-			requestAnimationFrame(() => {
-				this.forceUpdate();
-				this.resizeTicking = false;
-			});
-		}
-		this.resizeTicking = true;
+	private renderInner = (width: number, height: number, isScrolling: boolean, scrollTop: number) => {
+		const { items, targetColumnWidth, renderer, rowHeight } = this.props;
+		const { columnCount, columnWidth } = this.calculateIdealColumnDimensions(width, targetColumnWidth);
+		const rowCount = Math.ceil(items.length / columnCount);
+
+		return (
+			<GridContent
+				columnCount={columnCount}
+				columnWidth={columnWidth}
+				height={height}
+				isScrolling={isScrolling}
+				items={items}
+				renderer={renderer}
+				rowCount={rowCount}
+				rowHeight={rowHeight}
+				scrollTop={scrollTop}
+				width={width}
+			/>
+		);
 	}
 
-	private setContainer = (container: HTMLElement) => {
-		this.container = container;
+	private calculateIdealColumnDimensions = (width: number, columnWidth: number) => {
+		const theoreticalColumns = width / columnWidth;
+
+		const minColumns = Math.floor(theoreticalColumns);
+		const maxColumns = Math.ceil(theoreticalColumns);
+
+		const minDelta = (width - (minColumns * columnWidth)) / minColumns;
+		const maxDelta = (width - (maxColumns * columnWidth)) / maxColumns;
+
+		return Math.abs(minDelta) < Math.abs(maxDelta)
+			? { columnCount: minColumns, columnWidth: columnWidth + minDelta }
+			: { columnCount: maxColumns, columnWidth: columnWidth + maxDelta };
 	}
 }
 
-export interface OwnProps {
-	scrollElement: HTMLElement;
-
+interface OwnProps {
 	items: any[];
 	rowHeight: number;
-	columnWidth: number;
-
-	loadThreshold: number;
-	loadElements: (params: LoadGridElements) => void;
-	cellRenderer: (props: { item: any, index: number }) => JSX.Element;
+	targetColumnWidth: number;
+	scrollElement: HTMLElement;
+	renderer: (props: { item: any, index: number }) => JSX.Element;
 }
-
-export * from "./common";

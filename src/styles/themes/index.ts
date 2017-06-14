@@ -14,6 +14,8 @@ export interface ThemeProperties {
 
 	"--navigation-bar-background": string;
 	"--navigation-bar-text": string;
+
+	"--viewer-text": string;
 }
 
 export interface Theme {
