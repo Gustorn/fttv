@@ -30,7 +30,7 @@ const App = ({ theme }: Props) => (
 				<Route exact path="/auth" component={Auth} />
 				<Route exact path="/settings" component={Settings} />
 				<Route exact path="/directory" component={Directory} />
-				<Route exact path="/directory/following" component={null!} />
+				<Route exact path="/directory/following" component={Directory} />
 			</div>
 		</main>
 	</CustomProperties>

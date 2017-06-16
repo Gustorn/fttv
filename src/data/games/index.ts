@@ -2,6 +2,7 @@ import { ActionsObservable } from "redux-observable";
 
 import { getTopGames } from "common/twitch-api/games";
 
+import { Reducer } from "data";
 import { Action, ActionTypes, FetchTopAction, setTop } from "./actions";
 import { State } from "./model";
 
@@ -9,7 +10,7 @@ export const initialState: State = {
 	topGames: { _total: 0, top: [] }
 };
 
-export const reducer = (state = initialState, action: Action): State => {
+export const reducer: Reducer<State> = (state = initialState, action: Action): State => {
 	switch (action.type) {
 		case ActionTypes.SET_TOP: {
 			return { ...state, topGames: action.payload.topGames };

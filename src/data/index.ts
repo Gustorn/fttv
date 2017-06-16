@@ -20,6 +20,8 @@ export interface TypedAction<T extends string> {
 	payload?: {};
 }
 
+export type Reducer<S> = (state: S | undefined, action: TypedAction<any>) => S;
+
 export const rootEpic = combineEpics<TypedAction<any>, State>(
 	errors.epic,
 	games.epic,
