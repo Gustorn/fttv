@@ -22,6 +22,10 @@ export interface TypedAction<T extends string> {
 
 export type Reducer<S> = (state: S | undefined, action: TypedAction<any>) => S;
 
+export interface LightStore {
+	getState(): State;
+}
+
 export const rootEpic = combineEpics<TypedAction<any>, State>(
 	errors.epic,
 	games.epic,

@@ -1,41 +1,30 @@
 import React from "react";
-
 import { AutoSizer } from "react-virtualized/dist/commonjs/AutoSizer";
-import { WindowScroller } from "react-virtualized/dist/commonjs/WindowScroller";
 
 import GridContent from "./content";
 
-export default class VirtualGrid extends React.PureComponent<OwnProps, {}> {
+export default class Grid extends React.PureComponent<OwnProps, {}> {
 	render() {
-		const { scrollElement } = this.props;
 		return (
-			<WindowScroller scrollElement={scrollElement}>
-				{({ height, isScrolling, scrollTop }) => (
-					<AutoSizer disableHeight>
-						{({ width }) => this.renderInner(width, height, isScrolling, scrollTop)}
-					</AutoSizer>
-				)}
-			</WindowScroller>
+			<AutoSizer {...this.props}>
+				{this.renderContent}
+			</AutoSizer>
 		);
 	}
 
-	private renderInner = (width: number, height: number, isScrolling: boolean, scrollTop: number) => {
-		const { items, targetColumnWidth, renderer, rowHeight } = this.props;
+	renderContent = ({ width, height }: { width: number, height: number }) => {
+		const { items, targetColumnWidth, gridClass, renderer, fillGrid } = this.props;
 		const { columnCount, columnWidth } = this.calculateIdealColumnDimensions(width, targetColumnWidth);
-		const rowCount = Math.ceil(items.length / columnCount);
-
 		return (
 			<GridContent
-				columnCount={columnCount}
-				columnWidth={columnWidth}
-				height={height}
-				isScrolling={isScrolling}
+				gridClass={gridClass}
 				items={items}
 				renderer={renderer}
-				rowCount={rowCount}
-				rowHeight={rowHeight}
-				scrollTop={scrollTop}
+				columnCount={columnCount}
+				columnWidth={columnWidth}
 				width={width}
+				height={height}
+				fillGrid={fillGrid}
 			/>
 		);
 	}
@@ -49,7 +38,7 @@ export default class VirtualGrid extends React.PureComponent<OwnProps, {}> {
 		const minDelta = (width - (minColumns * columnWidth)) / minColumns;
 		const maxDelta = (width - (maxColumns * columnWidth)) / maxColumns;
 
-		return Math.abs(minDelta) < Math.abs(maxDelta)
+		return minDelta < -maxDelta * 10000
 			? { columnCount: minColumns, columnWidth: columnWidth + minDelta }
 			: { columnCount: maxColumns, columnWidth: columnWidth + maxDelta };
 	}
@@ -57,8 +46,8 @@ export default class VirtualGrid extends React.PureComponent<OwnProps, {}> {
 
 interface OwnProps {
 	items: any[];
-	rowHeight: number;
+	gridClass?: string;
 	targetColumnWidth: number;
-	scrollElement: HTMLElement;
 	renderer: (props: { item: any, index: number }) => JSX.Element;
+	fillGrid?: (requestedElements: number) => void;
 }

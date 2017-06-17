@@ -3,12 +3,12 @@ import { connect } from "react-redux";
 import { Action, Dispatch, bindActionCreators } from "redux";
 
 import { State } from "data";
-import { fetchTop } from "data/games";
+import { loadNext } from "data/games";
 
 import { TopGame } from "common/twitch-api/games";
 import { returnOf } from "common/util";
 
-import VirtualGrid from "components/grid";
+import Grid from "components/grid";
 import { GridCellProps } from "components/grid/cell";
 import GameCell from "components/grid/cell/game";
 
@@ -21,22 +21,30 @@ class Directory extends React.Component<Props, DirectoryState> {
 	}
 
 	componentWillMount() {
-		this.props.fetchTop(0, 60);
+		this.props.loadNext(60);
 	}
 
 	render() {
 		const { topGames } = this.props;
 		return (
 			<div className={style.directoryContainer} ref={this.setScrollingElement}>
-				<VirtualGrid
+				<Grid
+					gridClass={style.gameGrid}
 					items={topGames.top}
 					targetColumnWidth={200}
-					rowHeight={315}
 					renderer={this.renderCell}
-					scrollElement={this.state.scrollElement}
+					fillGrid={this.fillGrid}
 				/>
 			</div>
 		);
+	}
+
+	private fillGrid = (elements: number) => {
+		const { loadNext, isLoading } = this.props;
+		if (!isLoading) {
+			// console.log("Fetching", elements);
+			// loadNext(Math.min(elements, 100));
+		}
 	}
 
 	private setScrollingElement = (scrollElement: HTMLElement) => {
@@ -51,11 +59,12 @@ class Directory extends React.Component<Props, DirectoryState> {
 }
 
 const mapStateToProps = (state: State) => ({
-	topGames: state.games.topGames
+	topGames: state.games.topGames,
+	isLoading: state.games.isLoading
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => bindActionCreators({
-	fetchTop
+	loadNext
 }, dispatch);
 
 type Props = typeof StateProps & typeof DispatchProps;

@@ -1,4 +1,5 @@
 import React from "react";
+import classnames from "classnames";
 import { Interpolate, translate } from "react-i18next";
 
 import { TopGame } from "common/twitch-api/games";
@@ -11,18 +12,19 @@ export default class DummyCell extends React.PureComponent<GridCellProps<TopGame
 		const { item } = this.props;
 
 		return (
-			<div className={style.gameCell}>
-				<div
-					className={style.gameCellBackground}
-					style={{ backgroundImage: `url(${item.game.box.large})` }}
-				/>
-				<div className={style.gameCellTitle}>
-					{item.game.name}
+			<a className={style.cell}>
+				<figure className={style.box}>
+					<img className={style.boxImage} src={item.game.box.large} />
+				</figure>
+				<div className={style.body}>
+					<h3 className={classnames(style.title, "ellipsis")}>
+						{item.game.name}
+					</h3>
+					<p className={classnames(style.viewers, "ellipsis")}>
+						<Interpolate i18nKey="card.viewers" value={item.viewers.toLocaleString()} />
+					</p>
 				</div>
-				<div className={style.gameCellViewers}>
-					<Interpolate i18nKey="card.viewers" value={item.viewers.toLocaleString()} />
-				</div>
-			</div>
+			</a>
 		);
 	}
 }

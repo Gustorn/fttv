@@ -1,34 +1,41 @@
-.gameCell {
-	height: 100%;
-	display: flex;
-	padding: 0 10px;
-	flex-flow: column nowrap;
-	align-items: center;
+.cell {
+	display: block;
+	cursor: pointer;
+
+	&:hover {
+		text-decoration: none;
+		.title {
+			color: var(--app-accent);
+		}
+	}
 }
 
-.gameCellBackground {
+.box {
 	width: 100%;
-	flex: 0 1 250px;
-	background-repeat: no-repeat;
-	background-position: center;
-	background-size: 100% 100%;
 }
 
-.gameCellTitle, .gameCellViewers {
+.boxImage {
+	display: block;
+}
+
+.body {
 	width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	padding: 0.5rem 0 0;
+}
+
+.title, .viewers {
+	width: 100%;
 	line-height: 2rem;
 	align-self: flex-start;
 }
 
-.gameCellTitle {
+.title {
 	color: var(--app-text);
+	margin-bottom: 0;
 	font-size: 1.4rem;
 }
 
-.gameCellViewers {
+.viewers {
 	color: var(--viewer-text);
 	font-size: 1.2rem;
 }

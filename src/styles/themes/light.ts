@@ -5,6 +5,7 @@ export default {
 	properties: {
 		"--app-background": "#fff",
 		"--app-text": "#19171c",
+		"--app-accent": "#4b367c",
 
 		"--balloon-background": "#fff",
 		"--balloon-border": "#dad8de",
