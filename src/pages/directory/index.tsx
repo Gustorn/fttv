@@ -1,5 +1,6 @@
 import React from "react";
 import { InjectedTranslateProps, translate } from "react-i18next";
+import Tabs, { Tab } from "components/tabs";
 import { connect } from "react-redux";
 import { Action, Dispatch, bindActionCreators } from "redux";
 
@@ -28,33 +29,64 @@ class Directory extends React.Component<Props & InjectedTranslateProps, Director
 		this.props.loadNext(60);
 	}
 
-	componentWillUnmount() {
-		this.props.unload();
+	render() {
+		const t = this.props.t!;
+		return (
+			<Tabs
+				containerRef={this.setScrollingElement}
+				className={style.directoryContainer}
+				onSelect={this.handleTabChange}
+			>
+				<Tab label={t("tabs.games")}>
+					{this.renderGames()}
+				</Tab>
+
+				<Tab label={t("tabs.communities")}>
+					<div>Communities</div>
+				</Tab>
+
+				<Tab label={t("tabs.popular")}>
+					<div>Popular</div>
+				</Tab>
+
+				<Tab label={t("tabs.creative")}>
+					<div>Creative</div>
+				</Tab>
+
+				<Tab label={t("tabs.discover")}>
+					<div>Discover</div>
+				</Tab>
+			</Tabs>
+		);
 	}
 
-	render() {
+	private renderGames() {
 		const { topGames, isLoading } = this.props;
 		return (
-			<div ref={this.setScrollingElement} className={style.directoryContainer}>
-				<InfiniteScroll
-					items={topGames.top}
-					loadItems={this.loadGames}
-					threshold={600}
-					scrollElement={this.state.scrollElement}
-					isLoading={isLoading}
-				>
-					{({ items, registerChild }) => (
-						<Grid
-							gridClass={style.gameGrid}
-							items={items}
-							targetColumnWidth={200}
-							registerLoader={registerChild}
-							cell={this.renderCell}
-						/>
-					)}
-				</InfiniteScroll>
-			</div>
+			<InfiniteScroll
+				items={topGames.top}
+				loadItems={this.loadGames}
+				threshold={600}
+				scrollElement={this.state.scrollElement}
+				isLoading={isLoading}
+			>
+				{({ items, registerChild }) => (
+					<Grid
+						gridClass={style.gameGrid}
+						items={items}
+						targetColumnWidth="18em"
+						registerLoader={registerChild}
+						cell={this.renderCell}
+					/>
+				)}
+			</InfiniteScroll>
 		);
+	}
+
+	private handleTabChange = (activeTabIndex: number) => {
+		if (activeTabIndex !== 0) {
+			this.props.unload();
+		}
 	}
 
 	private loadGames = ({ elementsHint }: { elementsHint: number }) => {
@@ -66,7 +98,7 @@ class Directory extends React.Component<Props & InjectedTranslateProps, Director
 		}
 	}
 
-	private setScrollingElement = (scrollElement: any) => {
+	private setScrollingElement = (scrollElement: HTMLElement) => {
 		this.setState({ ...this.state, scrollElement });
 	}
 

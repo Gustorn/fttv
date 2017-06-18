@@ -9,10 +9,13 @@ interface State {
 }
 
 export default class InfiniteScroll extends React.PureComponent<OwnProps, State> {
-	private child: HTMLElement;
-	private childHeight: number;
-	private wrapper: HTMLElement;
-	private visibleScrollArea: number;
+	private child: HTMLElement | undefined;
+	private childHeight: number | undefined;
+	private wrapper: HTMLElement | undefined;
+
+	private previousScroller: HTMLElement | undefined;
+
+	private visibleScrollArea: number | undefined;
 
 	private scrollTicking = false;
 	private isDirty = false;
@@ -20,6 +23,10 @@ export default class InfiniteScroll extends React.PureComponent<OwnProps, State>
 	static defaultProps: Partial<OwnProps> = {
 		threshold: 250
 	};
+
+	componentDidMount() {
+		this.registerScrollListeners(this.props);
+	}
 
 	componentWillReceiveProps(nextProps: OwnProps) {
 		if (this.props.items !== nextProps.items || this.props.isLoading !== nextProps.isLoading) {
@@ -29,18 +36,7 @@ export default class InfiniteScroll extends React.PureComponent<OwnProps, State>
 	}
 
 	componentWillUnmount() {
-		if (this.child) {
-			resizeDetector.uninstall(this.child);
-		}
-
-		if (this.wrapper) {
-			resizeDetector.uninstall(this.wrapper);
-		}
-
-		if (this.props.scrollElement) {
-			this.props.scrollElement.removeEventListener("scroll", this.handleScroll);
-			this.props.scrollElement.removeEventListener("touchmove", this.handleScroll);
-		}
+		this.clearComponent();
 	}
 
 	render() {
@@ -62,19 +58,20 @@ export default class InfiniteScroll extends React.PureComponent<OwnProps, State>
 		}
 
 		this.childHeight = e.clientHeight;
-		this.fillPage(this.childHeight, this.wrapper.scrollHeight);
+		this.fillPage(this.childHeight, this.wrapper && this.wrapper.scrollHeight);
 	}
 
 	private handleScroll = (event: Event) => {
-		if (this.isDirty || this.scrollTicking || !this.child || !this.wrapper || !this.visibleScrollArea) {
+		if (this.isDirty || this.scrollTicking || !this.child ||
+			!this.wrapper || !this.visibleScrollArea) {
 			return;
 		}
 
-		const scroller = event.target as HTMLElement;
-		const { scrollTop, scrollHeight } = scroller;
 		requestAnimationFrame(() => {
+			const scroller = event.target as HTMLElement;
+			const { scrollTop, scrollHeight } = scroller;
 			const { loadItems, threshold } = this.props;
-			if ((scrollTop + this.visibleScrollArea + threshold! > scrollHeight) && !this.isDirty) {
+			if ((scrollTop + this.visibleScrollArea! + threshold! > scrollHeight) && !this.isDirty) {
 				this.isDirty = true;
 				loadItems({});
 			}
@@ -83,7 +80,7 @@ export default class InfiniteScroll extends React.PureComponent<OwnProps, State>
 		this.scrollTicking = true;
 	}
 
-	private fillPage = (childHeight: number, wrapperHeight: number) => {
+	private fillPage = (childHeight: number | undefined, wrapperHeight: number | undefined) => {
 		if (this.isDirty || !childHeight || !wrapperHeight) {
 			return;
 		}
@@ -121,7 +118,7 @@ export default class InfiniteScroll extends React.PureComponent<OwnProps, State>
 	}
 
 	private registerScrollListeners = (nextProps: OwnProps) => {
-		const { scrollElement: previousScroller  } = this.props;
+		const { previousScroller  } = this;
 		const { scrollElement: nextScroller } = nextProps;
 
 		if (previousScroller === nextScroller) {
@@ -134,9 +131,37 @@ export default class InfiniteScroll extends React.PureComponent<OwnProps, State>
 			previousScroller.removeEventListener("touchmove", this.handleScroll);
 		}
 
-		resizeDetector.listenTo(nextScroller, this.setVisibleScrollArea);
-		nextScroller.addEventListener("scroll", this.handleScroll, true);
-		nextScroller.addEventListener("touchmove", this.handleScroll, true);
+		if (nextScroller) {
+			this.previousScroller = nextScroller;
+			resizeDetector.listenTo(nextScroller, this.setVisibleScrollArea);
+			nextScroller.addEventListener("scroll", this.handleScroll, true);
+			nextScroller.addEventListener("touchmove", this.handleScroll, true);
+		}
+	}
+
+	private clearComponent = () => {
+		this.child = undefined;
+		this.childHeight = undefined;
+		this.wrapper = undefined;
+		this.previousScroller = undefined;
+		this.visibleScrollArea  = undefined;
+
+		this.scrollTicking = false;
+		this.isDirty = false;
+
+		if (this.child) {
+			resizeDetector.uninstall(this.child);
+		}
+
+		if (this.wrapper) {
+			resizeDetector.uninstall(this.wrapper);
+		}
+
+		if (this.props.scrollElement) {
+			resizeDetector.uninstall(this.props.scrollElement);
+			this.props.scrollElement.removeEventListener("scroll", this.handleScroll);
+			this.props.scrollElement.removeEventListener("touchmove", this.handleScroll);
+		}
 	}
 
 	private setVisibleScrollArea = (element: HTMLElement) => {

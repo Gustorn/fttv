@@ -5,8 +5,7 @@ export default {
 	properties: {
 		"--app-background": "#1e1e1e",
 		"--app-text": "#d3d3d3",
-		"--app-accent": "#4b367c",
-		"--app-divider": "#282828",
+		"--app-text-accent": "#6441a4",
 
 		"--balloon-background": "#1e1e1e",
 		"--balloon-border": "#282828",
@@ -19,6 +18,11 @@ export default {
 		"--navigation-bar-background": "#4b367c",
 		"--navigation-bar-text": "#fff",
 
-		"--viewer-text": "#666"
+		"--viewer-text": "#666",
+
+		"--tab-text-active": "#d3d3d3",
+		"--tab-text-inactive": "#d3d3d3",
+		"--tab-divider-active": "#6441a4",
+		"--tab-divider-inactive": "#dad8de"
 	}
 } as Theme;

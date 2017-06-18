@@ -3,8 +3,7 @@ export interface ThemeProperties {
 
 	"--app-background": string;
 	"--app-text": string;
-	"--app-accent": string;
-	"--app-divider": string;
+	"--app-text-accent": string;
 
 	"--balloon-background": string;
 	"--balloon-border": string;
@@ -18,6 +17,11 @@ export interface ThemeProperties {
 	"--navigation-bar-text": string;
 
 	"--viewer-text": string;
+
+	"--tab-text-active": string;
+	"--tab-text-inactive": string;
+	"--tab-divider-active": string;
+	"--tab-divider-inactive": string;
 }
 
 export interface Theme {

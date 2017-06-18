@@ -7,7 +7,7 @@ import { GridCellProps } from "..";
 import style from "./index.scss";
 
 @translate("games")
-export default class DummyCell extends React.PureComponent<GridCellProps<TopGame>, {}> {
+export default class GameCell extends React.PureComponent<GridCellProps<TopGame>, {}> {
 	render() {
 		const { item } = this.props;
 

@@ -11,7 +11,7 @@ export default class Grid extends React.PureComponent<OwnProps, {}> {
 			<div
 				ref={registerLoader}
 				className={classnames(css.grid, gridClass)}
-				style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${targetColumnWidth}px, 1fr))` }}
+				style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${targetColumnWidth}, 1fr))` }}
 			>
 				{items.map((item, index) => (
 					<Cell key={index} item={item} index={index} />
@@ -24,7 +24,7 @@ export default class Grid extends React.PureComponent<OwnProps, {}> {
 interface OwnProps {
 	items: any[];
 	gridClass?: string;
-	targetColumnWidth: number;
+	targetColumnWidth: string;
 	registerLoader: (element: HTMLElement) => void;
 	cell: (props: GridCellProps<any>) => JSX.Element;
 }
