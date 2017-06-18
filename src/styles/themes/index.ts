@@ -4,6 +4,7 @@ export interface ThemeProperties {
 	"--app-background": string;
 	"--app-text": string;
 	"--app-accent": string;
+	"--app-divider": string;
 
 	"--balloon-background": string;
 	"--balloon-border": string;

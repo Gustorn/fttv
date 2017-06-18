@@ -14,11 +14,15 @@ export const initialState: State = {
 	topGames: { _total: 0, top: [] }
 };
 
+let isLoading = false;
+
 export const reducer: Reducer<State> = (state = initialState, action: Action): State => {
 	switch (action.type) {
 		case ActionTypes.LOAD_NEXT:
+			isLoading = false;
 			return { ...state, isLoading: true };
 		case ActionTypes.SET_TOP:
+			isLoading = false;
 			const newGames = concatDedupe(state.topGames.top, action.payload.topGames.top, value => value.game._id);
 			return {
 				...state,
@@ -27,6 +31,7 @@ export const reducer: Reducer<State> = (state = initialState, action: Action): S
 				topGames: { ...action.payload.topGames, top: newGames }
 			};
 		case ActionTypes.LOAD_ERROR:
+			isLoading = false;
 			return { ...state, isLoading: false, ...action.payload };
 		default: return state;
 	}
@@ -34,7 +39,9 @@ export const reducer: Reducer<State> = (state = initialState, action: Action): S
 
 export const epic = (actions$: ActionsObservable<FetchTopAction>, store: LightStore) => actions$
 	.ofType(ActionTypes.LOAD_NEXT)
+	.filter(() => !isLoading)
 	.switchMap(action => {
+		isLoading = true;
 		const offset = store.getState().games.offset;
 		const limit = action.payload.limit;
 		return getTopGames({ limit, offset })

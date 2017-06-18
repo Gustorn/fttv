@@ -6,6 +6,7 @@ export default {
 		"--app-background": "#1e1e1e",
 		"--app-text": "#d3d3d3",
 		"--app-accent": "#4b367c",
+		"--app-divider": "#282828",
 
 		"--balloon-background": "#1e1e1e",
 		"--balloon-border": "#282828",
