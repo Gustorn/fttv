@@ -6,5 +6,6 @@ import "rxjs/add/operator/delay";
 import "rxjs/add/operator/filter";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/switchMap";
+import "rxjs/add/operator/takeUntil";
 
 export { Observable } from "rxjs/Observable";

@@ -1,11 +1,10 @@
 import React from "react";
-import { translate, InjectedTranslateProps } from "react-i18next";
+import { InjectedTranslateProps, translate } from "react-i18next";
 import { connect } from "react-redux";
-import { Tabs, Tab, TabList, TabPanel } from "react-tabs";
 import { Action, Dispatch, bindActionCreators } from "redux";
 
 import { State } from "data";
-import { loadNext } from "data/games";
+import { loadNext, unload } from "data/games";
 
 import { TopGame } from "common/twitch-api/games";
 import { returnOf } from "common/util";
@@ -29,49 +28,32 @@ class Directory extends React.Component<Props & InjectedTranslateProps, Director
 		this.props.loadNext(60);
 	}
 
-	render() {
-		const t = this.props.t!;
-		return (
-			<div ref={this.setScrollingElement} className={style.directoryContainer}>
-				<Tabs className={style.tabs}>
-					<TabList>
-						<Tab>{t("tabs.games")}</Tab>
-						<Tab>{t("tabs.communities")}</Tab>
-						<Tab>{t("tabs.popular")}</Tab>
-						<Tab>{t("tabs.creative")}</Tab>
-						<Tab>{t("tabs.discover")}</Tab>
-					</TabList>
-
-					<TabPanel>{this.renderGames()}</TabPanel>
-					<TabPanel><h1>{t("tabs.communities")}</h1></TabPanel>
-					<TabPanel><h1>{t("tabs.popular")}</h1></TabPanel>
-					<TabPanel><h1>{t("tabs.creative")}</h1></TabPanel>
-					<TabPanel><h1>{t("tabs.discover")}</h1></TabPanel>
-				</Tabs>
-			</div>
-		);
+	componentWillUnmount() {
+		this.props.unload();
 	}
 
-	private renderGames() {
+	render() {
 		const { topGames, isLoading } = this.props;
 		return (
-			<InfiniteScroll
-				items={topGames.top}
-				loadItems={this.loadGames}
-				threshold={600}
-				scrollElement={this.state.scrollElement}
-				isLoading={isLoading}
-			>
-				{({ items, registerChild }) => (
-					<Grid
-						gridClass={style.gameGrid}
-						items={items}
-						targetColumnWidth={200}
-						registerLoader={registerChild}
-						cell={this.renderCell}
-					/>
-				)}
-			</InfiniteScroll>
+			<div ref={this.setScrollingElement} className={style.directoryContainer}>
+				<InfiniteScroll
+					items={topGames.top}
+					loadItems={this.loadGames}
+					threshold={600}
+					scrollElement={this.state.scrollElement}
+					isLoading={isLoading}
+				>
+					{({ items, registerChild }) => (
+						<Grid
+							gridClass={style.gameGrid}
+							items={items}
+							targetColumnWidth={200}
+							registerLoader={registerChild}
+							cell={this.renderCell}
+						/>
+					)}
+				</InfiniteScroll>
+			</div>
 		);
 	}
 
@@ -85,7 +67,6 @@ class Directory extends React.Component<Props & InjectedTranslateProps, Director
 	}
 
 	private setScrollingElement = (scrollElement: any) => {
-		console.log(scrollElement);
 		this.setState({ ...this.state, scrollElement });
 	}
 
@@ -102,7 +83,9 @@ const mapStateToProps = (state: State) => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => bindActionCreators({
-	loadNext
+	loadNext,
+	unload
+
 }, dispatch);
 
 type Props = typeof StateProps & typeof DispatchProps;
