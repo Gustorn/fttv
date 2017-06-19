@@ -1,11 +1,12 @@
 .container {
 	width: 100%;
 	display: flex;
+	position: absolute;
 	background: var(--app-background);
 	color: var(--app-text);
 	// account for navbar
+	padding-top: 5rem;
 	height: 100vh;
-	padding-top: 4.5rem;
 }
 
 .page {
