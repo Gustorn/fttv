@@ -42,7 +42,6 @@
 		"@types/react-router-dom": "^4.0.4",
 		"@types/webpack-env": "^1.13.0",
 		"autoprefixer": "^7.1.1",
-		"babili-webpack-plugin": "^0.1.1",
 		"clean-webpack-plugin": "^0.1.16",
 		"copy-webpack-plugin": "^4.0.1",
 		"cross-env": "^5.0.1",
@@ -70,6 +69,8 @@
 		"tslint-react": "^3.0.0",
 		"typescript": "^2.4.0",
 		"typings-for-css-modules-loader": "^1.5.0",
+		"uglify-js": "^3.0.18",
+		"uglifyjs-webpack-plugin": "^0.4.4",
 		"webpack": "^2.6.1",
 		"webpack-bundle-analyzer": "^2.8.2",
 		"webpack-dev-server": "^2.4.5",
@@ -99,5 +100,6 @@
 		"redux-observable": "^0.14.1",
 		"redux-persist": "^4.8.0",
 		"rxjs": "^5.4.1"
-	}
+	},
+	"false": {}
 }
