@@ -74,7 +74,7 @@ class Directory extends React.Component<Props & InjectedTranslateProps, Director
 					<Grid
 						gridClass={style.gameGrid}
 						items={items}
-						targetColumnWidth="18em"
+						targetColumnWidth="18rem"
 						registerLoader={registerChild}
 						cell={this.renderCell}
 					/>
@@ -86,6 +86,8 @@ class Directory extends React.Component<Props & InjectedTranslateProps, Director
 	private handleTabChange = (activeTabIndex: number) => {
 		if (activeTabIndex !== 0) {
 			this.props.unload();
+		} else {
+			this.props.loadNext(60);
 		}
 	}
 

@@ -18,6 +18,8 @@ let isLoading = false;
 
 export const reducer: Reducer<State> = (state = initialState, action: Action): State => {
 	switch (action.type) {
+		case ActionTypes.LOAD_NEXT:
+			return { ...state, isLoading: true };
 		case ActionTypes.SET_TOP:
 			isLoading = false;
 			const newGames = concatDedupe(state.topGames.top, action.payload.topGames.top, value => value.game._id);

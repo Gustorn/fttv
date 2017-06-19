@@ -1,6 +1,9 @@
 .grid {
 	width: 100%;
 	display: grid;
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
 .cellWrapper {

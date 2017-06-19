@@ -1,38 +1,36 @@
 import React from "react";
 
-import resizeDetector, { Listener } from "common/resize-detector";
+import { BehaviorSubject, Observable, Subject, Subscription, elementResize, pausable } from "common/rxjs";
 
-const wrapperStyle = { width: "100%", height: "100%" };
-
-interface State {
-	wrapper: HTMLElement;
-}
+const wrapperStyle = { width: "100%", height: "100%", position: "relative" as "relative" };
 
 export default class InfiniteScroll extends React.PureComponent<OwnProps, State> {
+	private pauseStream: BehaviorSubject<boolean>;
+	private componentDestroyed: Subject<{}>;
+
+	private pause$: Observable<boolean>;
+	private resize: Subscription | undefined;
+	private scroll: Subscription | undefined;
+
 	private child: HTMLElement | undefined;
-	private childHeight: number | undefined;
 	private wrapper: HTMLElement | undefined;
 
-	private previousScroller: HTMLElement | undefined;
-
-	private visibleScrollArea: number | undefined;
-
-	private scrollTicking = false;
-	private isDirty = false;
-
-	static defaultProps: Partial<OwnProps> = {
-		threshold: 250
-	};
+	constructor(props: OwnProps) {
+		super(props);
+		this.pauseStream = new BehaviorSubject(this.props.isLoading);
+		this.pause$ = this.pauseStream.distinctUntilChanged();
+		this.componentDestroyed = new Subject();
+	}
 
 	componentDidMount() {
-		this.registerScrollListeners(this.props);
+		this.setupObservables(this.props);
 	}
 
 	componentWillReceiveProps(nextProps: OwnProps) {
-		if (this.props.items !== nextProps.items || this.props.isLoading !== nextProps.isLoading) {
-			this.isDirty = false;
+		if (this.props.items !== nextProps.items) {
+			this.pauseStream.next(false);
 		}
-		this.registerScrollListeners(nextProps);
+		this.setupObservables(nextProps);
 	}
 
 	componentWillUnmount() {
@@ -46,127 +44,104 @@ export default class InfiniteScroll extends React.PureComponent<OwnProps, State>
 		}
 
 		return (
-			<div ref={this.registerWrapper} style={wrapperStyle}>
-				{children({ items: items!, registerChild: this.registerChild })}
+			<div ref={this.setWrapper} style={wrapperStyle}>
+				{children({ items: items!, registerChild: this.setChild })}
 			</div>
 		);
 	}
 
-	private handleResize: Listener = e => {
-		if (this.childHeight === e.clientHeight) {
-			return;
-		}
-
-		this.childHeight = e.clientHeight;
-		this.fillPage(this.childHeight, this.wrapper && this.wrapper.scrollHeight);
-	}
-
-	private handleScroll = (event: Event) => {
-		if (this.isDirty || this.scrollTicking || !this.child ||
-			!this.wrapper || !this.visibleScrollArea) {
-			return;
-		}
-
-		requestAnimationFrame(() => {
-			const scroller = event.target as HTMLElement;
-			const { scrollTop, scrollHeight } = scroller;
-			const { loadItems, threshold } = this.props;
-			if ((scrollTop + this.visibleScrollArea! + threshold! > scrollHeight) && !this.isDirty) {
-				this.isDirty = true;
-				loadItems({});
-			}
-			this.scrollTicking = false;
-		});
-		this.scrollTicking = true;
-	}
-
-	private fillPage = (childHeight: number | undefined, wrapperHeight: number | undefined) => {
-		if (this.isDirty || !childHeight || !wrapperHeight) {
-			return;
-		}
-
-		if (childHeight < wrapperHeight) {
-			this.isDirty = true;
-
-			const { items, loadItems } = this.props;
-			const itemsPerHeight = Math.ceil(items.length / childHeight);
-			const additionalItems = Math.ceil(itemsPerHeight * (wrapperHeight - childHeight));
-			loadItems({ elementsHint: additionalItems });
-		}
-	}
-
-	private registerWrapper = (element: HTMLElement) => {
-		if (this.wrapper === element) {
-			return;
-		}
-		this.wrapper = element;
-	}
-
-	private registerChild = (element: HTMLElement) => {
-		if (this.child === element) {
-			return;
-		}
-
-		if (this.child) {
-			resizeDetector.removeListener(this.child, this.handleResize);
-		}
-
-		if (element) {
-			resizeDetector.listenTo(element, this.handleResize);
-			this.child = element;
-		}
-	}
-
-	private registerScrollListeners = (nextProps: OwnProps) => {
-		const { previousScroller  } = this;
-		const { scrollElement: nextScroller } = nextProps;
-
-		if (previousScroller === nextScroller) {
-			return;
-		}
-
-		if (previousScroller) {
-			resizeDetector.removeListener(previousScroller, this.setVisibleScrollArea);
-			previousScroller.removeEventListener("scroll", this.handleScroll);
-			previousScroller.removeEventListener("touchmove", this.handleScroll);
-		}
-
-		if (nextScroller) {
-			this.previousScroller = nextScroller;
-			resizeDetector.listenTo(nextScroller, this.setVisibleScrollArea);
-			nextScroller.addEventListener("scroll", this.handleScroll, true);
-			nextScroller.addEventListener("touchmove", this.handleScroll, true);
-		}
+	private setupObservables = (props: OwnProps) => {
+		this.setupResize();
+		this.setupScroll(props);
 	}
 
 	private clearComponent = () => {
-		this.child = undefined;
-		this.childHeight = undefined;
-		this.wrapper = undefined;
-		this.previousScroller = undefined;
-		this.visibleScrollArea  = undefined;
-
-		this.scrollTicking = false;
-		this.isDirty = false;
-
-		if (this.child) {
-			resizeDetector.uninstall(this.child);
-		}
-
-		if (this.wrapper) {
-			resizeDetector.uninstall(this.wrapper);
-		}
-
-		if (this.props.scrollElement) {
-			resizeDetector.uninstall(this.props.scrollElement);
-			this.props.scrollElement.removeEventListener("scroll", this.handleScroll);
-			this.props.scrollElement.removeEventListener("touchmove", this.handleScroll);
-		}
+		this.componentDestroyed.next();
+		this.resize = this.scroll = this.child = this.wrapper = undefined;
 	}
 
-	private setVisibleScrollArea = (element: HTMLElement) => {
-		this.visibleScrollArea = element.offsetHeight;
+	private setupResize = () => {
+		if (this.resize || !this.child || !this.wrapper) {
+			return;
+		}
+
+		const resize$ = elementResize(this.child)
+			.withLatestFrom(elementResize(this.wrapper), (child, wrapper) => ({
+				wrapperHeight: wrapper.offsetHeight,
+				childHeight: child.scrollHeight
+			}))
+			.filter(InfiniteScroll.needsFill)
+			.takeUntil(this.componentDestroyed);
+
+		this.resize = pausable(this.pause$, resize$).subscribe(resizePair => {
+			this.pauseStream.next(true);
+			this.props.loadItems({ elementsHint: this.calculateElementsHint(resizePair) });
+		});
 	}
+
+	private setupScroll = (props: OwnProps) => {
+		const { scrollElement, threshold } = props;
+		if (this.scroll || !scrollElement) {
+			return;
+		}
+
+		const scroll$ = Observable
+			.fromEvent<Event>(scrollElement, "scroll", { capture: true, passive: true })
+			.map(event => {
+				const { scrollTop, scrollHeight, clientHeight } = event.target as HTMLElement;
+				return { scrollTop, scrollHeight, clientHeight };
+			})
+			.pairwise()
+			.filter(scrollPair =>
+				InfiniteScroll.isScrollingDown(scrollPair) &&
+				InfiniteScroll.hitThreshold(scrollPair[1], threshold)
+			)
+			.takeUntil(this.componentDestroyed);
+
+		this.scroll = pausable(this.pause$, scroll$).subscribe(() => {
+			this.pauseStream.next(true);
+			this.props.loadItems({});
+		});
+	}
+
+	private setChild = (element: HTMLElement) => {
+		this.child = element;
+		this.setupResize();
+	}
+
+	private setWrapper = (element: HTMLElement) => {
+		this.wrapper = element;
+		this.setupResize();
+	}
+
+	private calculateElementsHint = ({ wrapperHeight, childHeight }: ResizePair) => {
+		const { items } = this.props;
+		const itemPerHeight = Math.ceil(items.length / childHeight);
+		return Math.ceil(itemPerHeight * (wrapperHeight - childHeight));
+	}
+
+	private static isScrollingDown = ([oldScroll, newScroll]: [ScrollState, ScrollState]) => {
+		return newScroll.scrollHeight === oldScroll.scrollHeight && newScroll.scrollTop >= oldScroll.scrollTop;
+	}
+
+	private static hitThreshold = (newScroll: ScrollState, threshold: number) => {
+		return newScroll.scrollTop + newScroll.clientHeight + threshold >= newScroll.scrollHeight;
+	}
+
+	private static needsFill = (pair: ResizePair) => {
+		return !!pair.childHeight && !!pair.wrapperHeight && pair.childHeight < pair.wrapperHeight;
+	}
+}
+
+interface ScrollState {
+	scrollTop: number;
+	scrollHeight: number;
+	clientHeight: number;
+}
+
+interface ResizePair {
+	wrapperHeight: number;
+	childHeight: number;
 }
 
 interface OwnProps {
@@ -175,5 +150,9 @@ interface OwnProps {
 	isLoading: boolean;
 	loadItems: (props: { elementsHint?: number }) => void;
 	scrollElement: HTMLElement;
-	threshold?: number;
+	threshold: number;
+}
+
+interface State {
+	wrapper: HTMLElement;
 }
